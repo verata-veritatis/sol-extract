@@ -182,7 +182,7 @@
 		margin: 0 auto;
 	}
 	h1 {
-		color: #26d5ff;
+		color: rgb(0,255,163);
 		font-family: "DM Mono", monospace;
 		font-size: 4em;
 		font-weight: 500;
@@ -193,7 +193,7 @@
 		-webkit-appearance: none;
 		border: none;
 		outline: none;
-		color: #26d5ff;
+		color: rgb(0,255,163);
 	}
 	.modal {
 		position: fixed;
@@ -206,7 +206,7 @@
 		align-items: center;
 	}
 	.modal-window {
-		background: #26d5ff;
+		background: rgb(0,255,163);
 		width: 550px;
 		height: 300px;
 		display: flex;
@@ -223,7 +223,7 @@
 		position: absolute;
 		top: 25px;
 		right: 30px;
-		color: #26d5ff;
+		color: rgb(0,255,163);
 		font-size: 30px;
 		cursor: pointer;
 	}
@@ -236,7 +236,7 @@
 	}
 	.title {
 		margin-bottom: 100px;
-		border: 2px solid #26d5ff;
+		border: 2px solid rgb(0,255,163);
 	}
 	.container {
 		display: flex;
@@ -271,7 +271,7 @@
 		margin: 50px;
 		height: 50px;
 		width: 250px;
-		background-color: #26d5ff;
+		background-color: rgb(0,255,163);
 		color: rgb(20 24 34);
 		text-transform: uppercase;
 		font-family: "DM Mono", monospace;
@@ -280,7 +280,7 @@
 		font-weight: 500;
 	}
 	.btn:hover {
-		background-color: #df7dff;
+		background-color: rgb(3,225,255);
 	}
 	.lds-ring {
 		display: inline-block;
