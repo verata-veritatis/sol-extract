@@ -1,7 +1,6 @@
 <script>
 	import { tick } from "svelte";
-	import JSZip from "jszip";
-	import FileSaver from "file-saver";
+	import StreamSaver from "streamsaver"
 	import { Connection, PublicKey } from "@solana/web3.js";
 
 	// Setup the connection.
@@ -99,32 +98,6 @@
 		return transactions;
 	};
 
-	const fetchTransactionsInfoSync = async (signatures) => {
-		let transactions = [];
-		let k = 1;
-		for (const signature of signatures) {
-			updateLoader(
-				`Fetching transaction ${k}/${signatures.length}`
-			);
-			const transactionInfo = await cnx.getTransaction(signature);
-			transactions.push(transactionInfo);
-			k++;
-			await sleep(1000)
-		}
-		return transactions;
-	};
-
-	// Method to compile and compress the extracted data, then prompt user for download.
-	const prepareData = async (address, data) => {
-		updateLoader(`Compressing extracted data`);
-		const zip = new JSZip();
-		zip.file(`tx_${address}.json`, JSON.stringify(data));
-		zip.generateAsync({ type: "blob" }).then(function (content) {
-			toggleLoader();
-			FileSaver.saveAs(content, `tx_${address}.zip`);
-		});
-	};
-
 	// Here's the main method.
 	const sendToExtract = async () => {
 		toggleLoader();
@@ -132,10 +105,31 @@
 		let txIds = await fetchTransactions(address);
 		if (txIds) {
 			let txs = await fetchTransactionsInfo(txIds);
-			await prepareData(address, txs);
+			await saveFileStream(address, txs)
 		}
 		return;
 	};
+
+	const saveFileStream = async (address, content) => {
+		const blob = new Blob([JSON.stringify(content)])
+		const fileStream = StreamSaver.createWriteStream(`tx_${address}.json`, {
+			size: blob.size
+		})
+
+		const readableStream = blob.stream()
+		if (window.WritableStream && readableStream.pipeTo) {
+			return readableStream.pipeTo(fileStream)
+			.then(() => console.log('done writing'))
+		}
+
+		window.writer = fileStream.getWriter()
+		const reader = readableStream.getReader()
+		const pump = () => reader.read()
+			.then(res => res.done
+			? writer.close()
+			: writer.write(res.value).then(pump))
+		pump()
+	}
 
 	// Add a listener to the input box, so when a user hits enter,
 	// the button is pressed.
