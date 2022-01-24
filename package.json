@@ -10,6 +10,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
+    "@types/bs58": "^4.0.1",
     "@types/file-saver": "^2.0.5",
     "@types/streamsaver": "^2.0.1",
     "rollup": "^2.3.4",
@@ -23,6 +24,8 @@
     "@rollup/plugin-json": "^4.1.0",
     "@solana/web3.js": "^1.31.0",
     "archiver": "^5.3.0",
+    "bs58": "^4.0.1",
+    "buffer": "^6.0.3",
     "file-saver": "^2.0.5",
     "jszip": "^3.7.1",
     "sirv-cli": "^2.0.0",

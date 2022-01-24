@@ -2,6 +2,8 @@
 	import { tick } from "svelte";
 	import StreamSaver from "streamsaver"
 	import { Connection, PublicKey } from "@solana/web3.js";
+	import bs58 from "bs58";
+	import { Buffer } from 'buffer';
 
 	// Use local MITM.
 	StreamSaver.mitm = './utils/mitm.html'
@@ -39,6 +41,20 @@
 		}
 		return chunks;
 	};
+
+	// Method to convert hex to base58 representations.
+	const hexToBase58 = (object) => {
+		let string = JSON.stringify(object);
+		let matches = [...new Set(string.match(/"_bn":"(.*?)"/g))];
+		for (let match of matches) {
+			let _bn = match.split(`:`)[1].replaceAll(`"`, ``);
+			let decoded = bs58.encode(
+				Buffer.from(_bn, `hex`)
+			);
+			string = string.replaceAll(`{"_bn":"${_bn}"}`, `"${decoded}"`)
+		}
+		return JSON.parse(string)
+	}
 
 	// Method to fetch all transaction IDs for a given account.
 	const fetchTransactions = async (address) => {
@@ -95,7 +111,9 @@
 			const transactionSet = await cnx.getParsedConfirmedTransactions(
 				signatureChunk
 			);
-			transactions = transactions.concat(transactionSet);
+			transactions = transactions.concat(
+				hexToBase58(transactionSet)
+			);
 			j++;
 		}
 		return transactions;
@@ -115,13 +133,14 @@
 
 	const saveFileStream = async (address, content) => {
 		updateLoader(`Writing to disk`);
-		const data = new Blob([JSON.stringify(content)])
+		const encoder = new TextEncoder()
+		const data = encoder.encode(JSON.stringify(content))
 		const fileStream = StreamSaver.createWriteStream(`tx_${address}.json`, {
-			size: data.size
+			size: data.byteLength
 		})
 		const writer = fileStream.getWriter()
-		writer.write(data)
-		writer.close()
+		await writer.write(data)
+		await writer.close()
 		toggleLoader();
 	}
 
