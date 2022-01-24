@@ -2,10 +2,10 @@
 	import { tick } from "svelte";
 	import JSZip from "jszip";
 	import FileSaver from "file-saver";
-	import { Connection, clusterApiUrl, PublicKey } from "@solana/web3.js";
+	import { Connection, PublicKey } from "@solana/web3.js";
 
 	// Setup the connection.
-	let cnx = new Connection(`https://solana-api.projectserum.com`);
+	let cnx = new Connection(`https://api.metaplex.solana.com/`);
 
 	// Toggle the loader modal.
 	const toggleLoader = () => {
@@ -39,8 +39,8 @@
 	};
 
 	// Method to fetch all transaction IDs for a given account.
-	let i = 0;
 	const fetchTransactions = async (address) => {
+		let i = 0;
 		let before = null;
 		let accountHistory = [];
 		let accountHistoryBlock;
@@ -82,8 +82,8 @@
 	};
 
 	// Method to fetch bulk transaction data for given transaction IDs.
-	let j = 1;
 	const fetchTransactionsInfo = async (signatures) => {
+		let j = 1;
 		let transactions = [];
 		const signatureChunks = splitArrayIntoChunksOfLen(signatures, 200);
 		for (const signatureChunk of signatureChunks) {
@@ -95,6 +95,21 @@
 			);
 			transactions = transactions.concat(transactionSet);
 			j++;
+		}
+		return transactions;
+	};
+
+	const fetchTransactionsInfoSync = async (signatures) => {
+		let transactions = [];
+		let k = 1;
+		for (const signature of signatures) {
+			updateLoader(
+				`Fetching transaction ${k}/${signatures.length}`
+			);
+			const transactionInfo = await cnx.getTransaction(signature);
+			transactions.push(transactionInfo);
+			k++;
+			await sleep(1000)
 		}
 		return transactions;
 	};
