@@ -5,7 +5,7 @@
 	import { Connection, clusterApiUrl, PublicKey } from "@solana/web3.js";
 
 	// Setup the connection.
-	let cnx = new Connection(clusterApiUrl(`mainnet-beta`));
+	let cnx = new Connection(`https://solana-api.projectserum.com`);
 
 	// Toggle the loader modal.
 	const toggleLoader = () => {
