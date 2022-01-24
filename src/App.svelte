@@ -3,6 +3,9 @@
 	import StreamSaver from "streamsaver"
 	import { Connection, PublicKey } from "@solana/web3.js";
 
+	// Use local MITM.
+	StreamSaver.mitm = './utils/mitm.html'
+
 	// Setup the connection.
 	let cnx = new Connection(`https://api.metaplex.solana.com/`);
 
@@ -111,24 +114,15 @@
 	};
 
 	const saveFileStream = async (address, content) => {
-		const blob = new Blob([JSON.stringify(content)])
+		updateLoader(`Writing to disk`);
+		const data = new Blob([JSON.stringify(content)])
 		const fileStream = StreamSaver.createWriteStream(`tx_${address}.json`, {
-			size: blob.size
+			size: data.size
 		})
-
-		const readableStream = blob.stream()
-		if (window.WritableStream && readableStream.pipeTo) {
-			return readableStream.pipeTo(fileStream)
-			.then(() => console.log('done writing'))
-		}
-
-		window.writer = fileStream.getWriter()
-		const reader = readableStream.getReader()
-		const pump = () => reader.read()
-			.then(res => res.done
-			? writer.close()
-			: writer.write(res.value).then(pump))
-		pump()
+		const writer = fileStream.getWriter()
+		writer.write(data)
+		writer.close()
+		toggleLoader();
 	}
 
 	// Add a listener to the input box, so when a user hits enter,
