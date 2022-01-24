@@ -5,7 +5,7 @@
 	import { Connection, clusterApiUrl, PublicKey } from "@solana/web3.js";
 
 	// Setup the connection.
-	let cnx = new Connection(clusterApiUrl("mainnet-beta"));
+	let cnx = new Connection(clusterApiUrl(`mainnet-beta`));
 
 	// Toggle the loader modal.
 	const toggleLoader = () => {
@@ -16,6 +16,10 @@
 	const updateLoader = (message) => {
 		document.getElementById(`loader-message`).innerText = message;
 	};
+
+	const toggleError = () => {
+		document.getElementById(`address`).classList.toggle(`error`)
+	}
 
 	// Sleep timer.
 	const sleep = (ms) => {
@@ -39,6 +43,7 @@
 	const fetchTransactions = async (address) => {
 		let before = null;
 		let accountHistory = [];
+		let accountHistoryBlock;
 		updateLoader(`\nFetching transactions for ${address}`);
 		while (true) {
 			let startingValue = i * 1000 + 1;
@@ -46,11 +51,16 @@
 			updateLoader(
 				`Fetching transaction IDs ${startingValue} - ${endingValue}`
 			);
-			let accountHistoryBlock =
-				await cnx.getConfirmedSignaturesForAddress2(
+			try {
+				accountHistoryBlock = await cnx.getSignaturesForAddress(
 					new PublicKey(address),
 					{ before: before }
 				);
+			} catch(e) {
+				toggleLoader()
+				toggleError()
+				return null
+			}
 			if (accountHistoryBlock.length === 0) {
 				break;
 			}
@@ -105,8 +115,11 @@
 		toggleLoader();
 		let address = document.getElementById(`address`).value;
 		let txIds = await fetchTransactions(address);
-		let txs = await fetchTransactionsInfo(txIds);
-		await prepareData(address, txs);
+		if (txIds) {
+			let txs = await fetchTransactionsInfo(txIds);
+			await prepareData(address, txs);
+		}
+		return;
 	};
 
 	// Add a listener to the input box, so when a user hits enter,
@@ -194,6 +207,9 @@
 		border: none;
 		outline: none;
 		color: rgb(0,255,163);
+		box-sizing: border-box;
+		border: 1px solid rgba(0, 0, 0, 0);
+		transition: border 0.25s;
 	}
 	.modal {
 		position: fixed;
@@ -308,6 +324,9 @@
 	}
 	.lds-ring div:nth-child(3) {
 		animation-delay: -0.15s;
+	}
+	:global(.error) {
+		border: 1px solid red !important;
 	}
 	@keyframes lds-ring {
 		0% {
