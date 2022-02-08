@@ -9,7 +9,7 @@
 	StreamSaver.mitm = './utils/mitm.html'
 
 	// Setup the connection.
-	let cnx = new Connection(`https://ssc-dao.genesysgo.net/`);
+	let cnx = new Connection(`https://api.metaplex.solana.com/`);
 
 	// Toggle the loader modal.
 	const toggleLoader = () => {
